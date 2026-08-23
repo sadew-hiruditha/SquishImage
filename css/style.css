@@ -493,13 +493,30 @@ body.dark-theme .mode-btn:hover {
   width: 100%;
   padding: 9px 12px;
   border: 1px solid var(--border-subtle);
-  background: var(--bg-input);
+  background-color: var(--bg-input);
   color: var(--text-primary);
   border-radius: var(--radius-sm);
   font-size: 13px;
   font-family: inherit;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.apple-select {
+  cursor: pointer;
+}
+
+/* Explicit styling for option elements in dropdown popup */
+.apple-select option {
+  background-color: #FFFFFF;
+  color: #1D1D1F;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+body.dark-theme .apple-select option {
+  background-color: #1C1C1E;
+  color: #F5F5F7;
 }
 
 .apple-select:focus, .apple-input:focus {
