@@ -135,18 +135,9 @@ class UIManager {
 
     // Dropzone card click (clicking anywhere on card opens picker unless clicking buttons)
     this.dropzone.addEventListener('click', (e) => {
-      if (e.target.closest('#btn-try-sample') || e.target.closest('#btn-select-files')) return;
+      if (e.target.closest('#btn-select-files')) return;
       this.fileInput.click();
     });
-
-    // Sample Image Button
-    const sampleBtn = document.getElementById('btn-try-sample');
-    if (sampleBtn) {
-      sampleBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.generateAndLoadSampleImage();
-      });
-    }
 
     // Download All ZIP
     this.btnDownloadAll.addEventListener('click', () => {
@@ -465,58 +456,6 @@ class UIManager {
       toast.classList.add('fade-out');
       setTimeout(() => toast.remove(), 400);
     }, 3200);
-  }
-
-  // Generates a rich, high-detail sample PNG with gradients, transparency, and geometric elements for testing
-  generateAndLoadSampleImage() {
-    const canvas = document.createElement('canvas');
-    canvas.width = 1200;
-    canvas.height = 800;
-    const ctx = canvas.getContext('2d');
-
-    // Vibrant Apple-style mesh gradient background
-    const grad = ctx.createRadialGradient(400, 300, 50, 600, 400, 600);
-    grad.addColorStop(0, '#FF375F');
-    grad.addColorStop(0.3, '#FF9F0A');
-    grad.addColorStop(0.6, '#BF5AF2');
-    grad.addColorStop(1, '#0A84FF');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 1200, 800);
-
-    // Translucent glass rounded card
-    ctx.save();
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.roundRect(150, 120, 900, 560, 40);
-    ctx.fill();
-    ctx.stroke();
-    ctx.restore();
-
-    // Graphic circles with alpha blending
-    for (let i = 0; i < 8; i++) {
-      ctx.fillStyle = `rgba(${Math.round(255 - i * 20)}, ${Math.round(100 + i * 15)}, 255, ${0.4 + i * 0.05})`;
-      ctx.beginPath();
-      ctx.arc(300 + i * 80, 400 + Math.sin(i) * 80, 50 + i * 5, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // Typography
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = 'bold 54px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('SquishPNG Sample', 600, 320);
-
-    ctx.font = '500 24px -apple-system, BlinkMacSystemFont, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-    ctx.fillText('High-Fidelity Offline PNG Compression with Alpha & Mesh Gradients', 600, 380);
-
-    canvas.toBlob((blob) => {
-      const sampleFile = new File([blob], 'SquishPNG-MeshGradient-Demo.png', { type: 'image/png' });
-      this.app.addFiles([sampleFile]);
-      this.showToast('Loaded Apple mesh gradient sample image', 'success');
-    }, 'image/png');
   }
 }
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'squishpng-v3';
+const CACHE_NAME = 'squishpng-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
