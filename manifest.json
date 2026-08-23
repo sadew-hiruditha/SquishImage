@@ -1,0 +1,17 @@
+{
+  "name": "SquishPNG - Offline Pro PNG & JPG Compressor",
+  "short_name": "SquishPNG",
+  "description": "Professional offline Apple-style PNG & JPG compressor with lossless and intelligent visual quantization.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#0071E3",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

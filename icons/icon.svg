@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0071E3" />
+      <stop offset="50%" stop-color="#47A3FF" />
+      <stop offset="100%" stop-color="#30D158" />
+    </linearGradient>
+    <linearGradient id="glass-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.4)" />
+      <stop offset="100%" stop-color="rgba(255,255,255,0.1)" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <!-- Squircle Base -->
+  <rect x="32" y="32" width="448" height="448" rx="104" fill="url(#bg-grad)" filter="url(#shadow)" />
+
+  <!-- Inner Glass Panel -->
+  <rect x="56" y="56" width="400" height="400" rx="80" fill="url(#glass-grad)" stroke="rgba(255,255,255,0.5)" stroke-width="2" />
+
+  <!-- Image Frame Icon -->
+  <g transform="translate(106, 116)">
+    <!-- Picture frame -->
+    <rect x="0" y="0" width="300" height="210" rx="28" fill="rgba(255,255,255,0.92)" filter="url(#shadow)" />
+    <!-- Sun / Color Circle -->
+    <circle cx="70" cy="65" r="24" fill="#FF9500" />
+    <!-- Mountain 1 -->
+    <path d="M20 180 L110 80 L180 180 Z" fill="#0071E3" opacity="0.85" />
+    <!-- Mountain 2 -->
+    <path d="M130 180 L210 100 L280 180 Z" fill="#30D158" opacity="0.85" />
+  </g>
+
+  <!-- Compression Arrows / Clamp Badge -->
+  <g transform="translate(166, 310)">
+    <rect x="0" y="0" width="180" height="72" rx="36" fill="#1D1D1F" filter="url(#shadow)" />
+    <!-- Arrow Left / Inward -->
+    <path d="M35 36 L55 24 L55 32 L85 32 L85 40 L55 40 L55 48 Z" fill="#FFF" />
+    <!-- Arrow Right / Inward -->
+    <path d="M145 36 L125 24 L125 32 L95 32 L95 40 L125 40 L125 48 Z" fill="#FFF" />
+    <!-- Center Dot / Gem -->
+    <circle cx="90" cy="36" r="5" fill="#30D158" />
+  </g>
+</svg>
