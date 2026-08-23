@@ -75,10 +75,39 @@
         <!-- Custom Granular Settings Drawer (Collapsible) -->
         <div class="custom-panel hidden" id="custom-controls-panel">
           <div class="custom-grid">
-            <!-- Palette Colors Slider -->
+            <!-- Output Format Selection -->
             <div class="control-group">
               <div class="control-label-row">
-                <label for="slider-colors">Max Palette Colors</label>
+                <label for="select-format">Target Output Format</label>
+                <span class="hint-text">Smart Auto</span>
+              </div>
+              <select id="select-format" class="apple-select">
+                <option value="auto" selected>Auto (Preserve PNG & JPG)</option>
+                <option value="jpg">Convert to JPG (Best for Photos)</option>
+                <option value="png">Convert to PNG (With Alpha)</option>
+                <option value="webp">Convert to Modern WebP</option>
+              </select>
+            </div>
+
+            <!-- JPG / WebP Quality Slider -->
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="slider-jpg-quality">JPG / Photo Quality</label>
+                <span class="control-value-badge" id="val-jpg-quality">80%</span>
+              </div>
+              <input type="range" id="slider-jpg-quality" min="20" max="98" step="2" value="80" class="apple-slider" />
+              <div class="slider-ticks">
+                <span>20% (Smallest)</span>
+                <span>65%</span>
+                <span>80% (Optimal)</span>
+                <span>98% (Lossless)</span>
+              </div>
+            </div>
+
+            <!-- Palette Colors Slider (PNG) -->
+            <div class="control-group">
+              <div class="control-label-row">
+                <label for="slider-colors">PNG Max Palette Colors</label>
                 <span class="control-value-badge" id="val-colors">128</span>
               </div>
               <input type="range" id="slider-colors" min="2" max="256" step="2" value="128" class="apple-slider" />
@@ -246,12 +275,12 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/vendor/pako.min.js?v=2.2"></script>
-  <script src="js/vendor/upng.min.js?v=2.2"></script>
-  <script src="js/vendor/jszip.min.js?v=2.2"></script>
-  <script src="js/compressor.js?v=2.2"></script>
-  <script src="js/compare.js?v=2.2"></script>
-  <script src="js/ui.js?v=2.2"></script>
-  <script src="js/app.js?v=2.2"></script>
+  <script src="js/vendor/pako.min.js?v=2.3"></script>
+  <script src="js/vendor/upng.min.js?v=2.3"></script>
+  <script src="js/vendor/jszip.min.js?v=2.3"></script>
+  <script src="js/compressor.js?v=2.3"></script>
+  <script src="js/compare.js?v=2.3"></script>
+  <script src="js/ui.js?v=2.3"></script>
+  <script src="js/app.js?v=2.3"></script>
 </body>
 </html>

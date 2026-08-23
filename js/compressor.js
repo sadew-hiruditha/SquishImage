@@ -1,6 +1,6 @@
 /**
- * SquishPNG - Core Compressor Engine & Worker Pool Manager
- * Includes universal image decoding fallback (UPNG + ImageBitmap / Canvas)
+ * SquishImage - Core Compressor Engine & Worker Pool Manager
+ * Supports intelligent format-aware PNG, JPG, and WebP compression
  */
 
 class CompressorEngine {
@@ -79,8 +79,7 @@ class CompressorEngine {
   }
 
   /**
-   * Universal Image Decoder: Decodes any PNG, JPG, WebP, BMP, GIF, SVG or corrupted chunk PNG
-   * using UPNG first, falling back to native ImageBitmap / Canvas
+   * Universal Image Decoder: Decodes any PNG, JPG, WebP, BMP, GIF, SVG
    */
   async decodeImageToRGBA(fileOrBlob, rawBuffer) {
     // 1. Try UPNG fast decode if rawBuffer is PNG
@@ -98,7 +97,7 @@ class CompressorEngine {
           };
         }
       } catch (e) {
-        console.warn('UPNG fast decode skipped, falling back to Canvas decoder:', e.message);
+        // Fallback to Canvas decoder
       }
     }
 
@@ -119,7 +118,7 @@ class CompressorEngine {
           height: bitmap.height
         };
       } catch (e) {
-        console.warn('createImageBitmap failed, trying HTMLImageElement fallback:', e.message);
+        // Continue to Image fallback
       }
     }
 
@@ -151,16 +150,83 @@ class CompressorEngine {
   }
 
   /**
-   * Compress PNG via worker pool or direct fallback
+   * Fast Perceptual JPEG/WebP Compression for Photography
+   */
+  async compressJPEGorWebP(fileOrBlob, targetMime = 'image/jpeg', quality = 0.80, options = {}) {
+    const startTime = performance.now();
+    const blob = fileOrBlob instanceof Blob ? fileOrBlob : new Blob([fileOrBlob]);
+    const bitmap = await createImageBitmap(blob);
+
+    let finalWidth = bitmap.width;
+    let finalHeight = bitmap.height;
+
+    // Handle resizing if requested
+    if (options.resize && options.resize.enabled) {
+      if (options.resize.scale && options.resize.scale < 1.0) {
+        finalWidth = Math.max(1, Math.round(bitmap.width * options.resize.scale));
+        finalHeight = Math.max(1, Math.round(bitmap.height * options.resize.scale));
+      }
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = finalWidth;
+    canvas.height = finalHeight;
+    const ctx = canvas.getContext('2d');
+
+    // Fill white background for JPEG (in case of any alpha channel)
+    if (targetMime === 'image/jpeg') {
+      ctx.fillStyle = options.matteColor || '#FFFFFF';
+      ctx.fillRect(0, 0, finalWidth, finalHeight);
+    }
+
+    ctx.drawImage(bitmap, 0, 0, finalWidth, finalHeight);
+
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((outBlob) => {
+        if (!outBlob) {
+          reject(new Error('Canvas export failed'));
+          return;
+        }
+        outBlob.arrayBuffer().then((buf) => {
+          const durationMs = Math.round(performance.now() - startTime);
+          resolve({
+            compressedBuffer: buf,
+            blob: outBlob,
+            blobUrl: URL.createObjectURL(outBlob),
+            width: finalWidth,
+            height: finalHeight,
+            originalWidth: bitmap.width,
+            originalHeight: bitmap.height,
+            durationMs,
+            originalSize: blob.size,
+            compressedSize: buf.byteLength,
+            format: targetMime === 'image/jpeg' ? 'jpg' : 'webp',
+            mimeType: targetMime
+          });
+        });
+      }, targetMime, quality);
+    });
+  }
+
+  /**
+   * Main entrypoint for compressing images
    */
   async compress(fileOrBuffer, options = {}, id = null) {
     const jobId = id || 'job_' + Math.random().toString(36).substring(2, 9);
 
     let rawBuffer;
     let originalSize;
+    let fileName = '';
+    let mimeType = '';
 
-    if (fileOrBuffer instanceof File || fileOrBuffer instanceof Blob) {
+    if (fileOrBuffer instanceof File) {
       originalSize = fileOrBuffer.size;
+      fileName = fileOrBuffer.name || '';
+      mimeType = fileOrBuffer.type || '';
+      rawBuffer = await fileOrBuffer.arrayBuffer();
+    } else if (fileOrBuffer instanceof Blob) {
+      originalSize = fileOrBuffer.size;
+      mimeType = fileOrBuffer.type || '';
       rawBuffer = await fileOrBuffer.arrayBuffer();
     } else if (fileOrBuffer instanceof ArrayBuffer) {
       originalSize = fileOrBuffer.byteLength;
@@ -169,7 +235,31 @@ class CompressorEngine {
       throw new Error('Unsupported input type for compression');
     }
 
-    // Decode to RGBA buffer to ensure 100% format & small file compatibility
+    // Determine input format
+    const isJPEG = mimeType.includes('jpeg') || mimeType.includes('jpg') || /\.(jpe?g|jfif)$/i.test(fileName);
+    const targetFormat = options.outputFormat || 'auto'; // 'auto' | 'png' | 'jpg' | 'webp'
+
+    // Determine whether to compress as JPEG / WebP or PNG
+    const shouldCompressAsJPEG = (targetFormat === 'jpg') || (targetFormat === 'auto' && isJPEG);
+    const shouldCompressAsWebP = (targetFormat === 'webp');
+
+    if (shouldCompressAsJPEG || shouldCompressAsWebP) {
+      const mode = options.mode || 'balanced';
+      let quality = 0.80; // 80% Balanced
+
+      if (mode === 'lossless') quality = 0.92;
+      else if (mode === 'balanced') quality = 0.80;
+      else if (mode === 'aggressive') quality = 0.65;
+      else if (mode === 'ultra') quality = 0.50;
+      else if (mode === 'custom') quality = (parseInt(options.jpgQuality) || 80) / 100;
+
+      const outMime = shouldCompressAsWebP ? 'image/webp' : 'image/jpeg';
+      const result = await this.compressJPEGorWebP(fileOrBuffer, outMime, quality, options);
+      result.id = jobId;
+      return result;
+    }
+
+    // Otherwise, compress as PNG
     const decoded = await this.decodeImageToRGBA(fileOrBuffer, rawBuffer);
 
     // Default compression options
@@ -247,7 +337,9 @@ class CompressorEngine {
           durationMs,
           colors: cnum,
           originalSize,
-          compressedSize: compressed.byteLength
+          compressedSize: compressed.byteLength,
+          format: 'png',
+          mimeType: 'image/png'
         });
       } catch (err) {
         reject(err);

@@ -190,10 +190,10 @@ class SquishPNGApp {
     this.ui.showToast(`Packaging ${doneItems.length} images into ZIP...`, 'info');
 
     const zip = new JSZip();
-    const folder = zip.folder('compressed-pngs');
+    const folder = zip.folder('compressed-images');
 
     for (const item of doneItems) {
-      const filename = this.ui.getOutputFilename(item.file.name);
+      const filename = this.ui.getOutputFilename(item.file.name, item);
       folder.file(filename, item.result.compressedBuffer);
     }
 

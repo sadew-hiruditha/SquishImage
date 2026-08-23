@@ -233,6 +233,23 @@ class UIManager {
       });
     }
 
+    // Output Format & JPG Quality
+    const formatSelect = document.getElementById('select-format');
+    if (formatSelect) {
+      formatSelect.addEventListener('change', (e) => {
+        this.app.updateCustomSetting('outputFormat', e.target.value);
+      });
+    }
+
+    const jpgQualitySlider = document.getElementById('slider-jpg-quality');
+    const jpgQualityValBadge = document.getElementById('val-jpg-quality');
+    if (jpgQualitySlider && jpgQualityValBadge) {
+      jpgQualitySlider.addEventListener('input', (e) => {
+        jpgQualityValBadge.textContent = `${e.target.value}%`;
+        this.app.updateCustomSetting('jpgQuality', parseInt(e.target.value));
+      });
+    }
+
     // Target Size
     const targetSizeInput = document.getElementById('input-target-kb');
     if (targetSizeInput) {
@@ -321,7 +338,7 @@ class UIManager {
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
                 <span>Inspect</span>
               </button>
-              <a class="action-btn btn-download-single" href="${item.result.blobUrl}" download="${this.getOutputFilename(item.file.name)}" title="Download Compressed PNG">
+              <a class="action-btn btn-download-single" href="${item.result.blobUrl}" download="${this.getOutputFilename(item.file.name, item)}" title="Download Compressed Image">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 <span>Save</span>
               </a>
@@ -396,19 +413,23 @@ class UIManager {
     }
   }
 
-  getOutputFilename(origName) {
-    if (origName.toLowerCase().endsWith('.png')) {
-      return origName;
-    }
+  getOutputFilename(origName, item = null) {
+    const format = item?.result?.format;
     const base = origName.replace(/\.[^/.]+$/, '');
-    return `${base}.png`;
+    if (format === 'jpg') return `${base}.jpg`;
+    if (format === 'webp') return `${base}.webp`;
+    if (format === 'png') return `${base}.png`;
+
+    if (origName.toLowerCase().endsWith('.png')) return origName;
+    if (/\.(jpe?g|jfif)$/i.test(origName)) return `${base}.jpg`;
+    return origName;
   }
 
   openInspector(index, item) {
     this.currentInspectedIndex = index;
     this.modalTitle.textContent = item.file.name;
     this.modalDownloadBtn.href = item.result.blobUrl;
-    this.modalDownloadBtn.download = this.getOutputFilename(item.file.name);
+    this.modalDownloadBtn.download = this.getOutputFilename(item.file.name, item);
 
     this.modalPrevBtn.disabled = index <= 0;
     this.modalNextBtn.disabled = index >= this.app.items.length - 1;
